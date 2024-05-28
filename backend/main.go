@@ -1,30 +1,40 @@
 package main
 
 import (
-	// "net/http"
-	// "github.com/gin-gonic/gin"
 	"backend/models"
+	"backend/routes"
 	"fmt"
+
+	//"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/joho/godotenv"
 )
 
 func main(){
-	// router:=gin.Default()
-	// router.GET("/",func(c *gin.Context){
-	// 	c.JSON(http.StatusOK,gin.H{
-	// 		"data":"Hello world"
-	// 	})
-	// })
+	// load env
 	godotenv.Load()
+
+	//setup the db
 	host:=os.Getenv("DB_HOST")
 	username:=os.Getenv("DB_USER")
 	password:=os.Getenv("DB_PASSWORD")
 	name:=os.Getenv("DB_NAME")
 	port:=os.Getenv("DB_PORT")
-	// fmt.Println("host",host,username,password,name,port)
 	models.ConnectDatabase(host,username,password,name,port)
+	fmt.Println("Database is up and running...")
+
+	//config routes
+	router:=gin.Default()
+	routes.RegisterJobRoutes(router)
+	routes.RegisterScrapingRoutes(router)
+	router.Run("localhost:8000")
+	
+	
+	
+	
 	// job := models.Job{
     //     Role: "Software Engineer",
     //     Benefits: "Develop software applications",
