@@ -3,17 +3,13 @@ package routes
 import (
 	"fmt"
 	"net/http"
-
+	"backend/controllers"
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterJobRoutes(route *gin.Engine) {
 	jobs := route.Group("/jobs")
-	jobs.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "All jobs",
-		})
-	})
+	jobs.GET("/", controllers.GetAllJobs)
 	jobs.GET("/:id", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "this is a single job",

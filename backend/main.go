@@ -1,11 +1,17 @@
 package main
 
 import (
+	//"backend/authjwt"
+	"backend/auth"
+	"backend/middlewares"
 	"backend/models"
 	"backend/routes"
-	"fmt"
+
+	//"backend/auth"
 
 	//"net/http"
+	//"net/http"
+
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -24,12 +30,25 @@ func main(){
 	name:=os.Getenv("DB_NAME")
 	port:=os.Getenv("DB_PORT")
 	models.ConnectDatabase(host,username,password,name,port)
-	fmt.Println("Database is up and running...")
 
 	//config routes
+	
 	router:=gin.Default()
+
+
+	api:=router.Group("/api")
+	api.POST("/signup",auth.Signup)
+	api.POST("/login",auth.Login)
+	api.GET("/me",middlewares.CheckAuth,auth.MyInfo)
+	// {
+	// 	api.POST("/register",authjwt.signup)
+	// }
+	
 	routes.RegisterJobRoutes(router)
 	routes.RegisterScrapingRoutes(router)
+	
+	
+	
 	router.Run("localhost:8000")
 	
 	

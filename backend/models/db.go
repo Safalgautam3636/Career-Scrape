@@ -15,10 +15,11 @@ func ConnectDatabase(host string, username string, password string, name string,
 	if err != nil {
 		panic("Failed to connect to database!")
 	}
-	err = database.AutoMigrate(&Job{})
+	err = database.AutoMigrate(&User{},&Job{})
 	if err != nil {
 		return
 	}
 	DB = database
 	fmt.Println(DB)
+	fmt.Println("Database up and running.........")
 }

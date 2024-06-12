@@ -3,7 +3,6 @@ package routes
 import (
 	"fmt"
 	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 

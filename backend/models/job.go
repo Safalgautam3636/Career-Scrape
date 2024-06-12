@@ -1,8 +1,13 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Job struct{
+	gorm.Model
 	ID uint `json:"id" gorm:"primary_key"`
 	Role string `json:"role"`
 	Link string `json:"link"`
