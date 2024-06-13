@@ -1,10 +1,10 @@
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
-
+import { NavigationMenuDemo } from "@/components/navigation-menu";
 export default function RootLayout({
   children,
-}: Readonly<{children: React.ReactNode;}>) {
+}: Readonly<{ children: React.ReactNode; }>) {
   return (
     <>
       <html lang="en" suppressHydrationWarning>
@@ -16,6 +16,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <NavigationMenuDemo />
             {children}
           </ThemeProvider>
         </body>

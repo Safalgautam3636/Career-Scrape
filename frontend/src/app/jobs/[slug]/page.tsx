@@ -1,3 +1,5 @@
-export default function Job() {
-    return <div>This is a Single Job</div>
+import { Job } from "@/components/job"
+
+export default function SingleJob() {
+    return <h1>Hi</h1>
 }
