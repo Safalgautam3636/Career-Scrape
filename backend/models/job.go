@@ -18,4 +18,6 @@ type Job struct{
 	Qualifications string `json:"qualifications"`
 	Responsibility string `json:"responsibility"`
 	Benefits string `json:"benefits"`
+	Salary string `json:"salary"`
+	YOE int `json:"yoe"` //years of experience
 }
