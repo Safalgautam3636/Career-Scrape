@@ -13,7 +13,7 @@ type Job struct{
 	Link string `json:"link"`
 	Address string `json:"address"`
 	CompanyName string `json:"company_name"`
-	DatePosted time.Time `json:"start_date"`
+	DatePosted time.Time `json:"posted_date"`
 	AboutJob string `json:"about_job"`
 	Qualifications string `json:"qualifications"`
 	Responsibility string `json:"responsibility"`

@@ -2,8 +2,8 @@ package main
 
 import (
 	//"backend/authjwt"
-	"backend/auth"
-	"backend/middlewares"
+	// "backend/auth"
+	// "backend/middlewares"
 	"backend/models"
 	"backend/routes"
 
@@ -36,16 +36,16 @@ func main(){
 	router:=gin.Default()
 
 
-	api:=router.Group("/api")
-	api.POST("/signup",auth.Signup)
-	api.POST("/login",auth.Login)
-	api.GET("/me",middlewares.CheckAuth,auth.MyInfo)
+	//api:=router.Group("/api")
+	// api.POST("/signup",auth.Signup)
+	// api.POST("/login",auth.Login)
+	// api.GET("/me",middlewares.CheckAuth,auth.MyInfo)
 	// {
 	// 	api.POST("/register",authjwt.signup)
 	// }
 	
 	routes.RegisterJobRoutes(router)
-	routes.RegisterScrapingRoutes(router)
+	//routes.RegisterScrapingRoutes(router)
 	
 	
 	
