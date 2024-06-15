@@ -6,24 +6,25 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"time"
-	"github.com/joho/godotenv"
 	"os"
+	"time"
 )
 
 type SignupUser struct {
 	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	IsAdmin  bool    `json:"isAdmin" gorm:"default:false"`
+	IsAdmin  bool   `json:"isAdmin" gorm:"default:false"`
 }
 
 type LoginUser struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
 var sampleSecretKey []byte
 
 // HELPERS
@@ -37,7 +38,7 @@ func HashPassword(password string) (string, error) {
 
 func GenerateToken(username string) (string, error) {
 	godotenv.Load()
-	sampleSecretKey= []byte(os.Getenv("JWT_KEY"))
+	sampleSecretKey = []byte(os.Getenv("JWT_KEY"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
 		"exp":      time.Now().Add(10 * time.Minute).Unix(),
@@ -54,7 +55,7 @@ func GenerateToken(username string) (string, error) {
 
 func VerifyToken(tokenString string) (*jwt.Token, error) {
 	godotenv.Load()
-	sampleSecretKey= []byte(os.Getenv("JWT_KEY"))
+	sampleSecretKey = []byte(os.Getenv("JWT_KEY"))
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) { return sampleSecretKey, nil })
 	if err != nil {
 		return nil, err
@@ -86,7 +87,7 @@ func Signup(c *gin.Context) {
 		Username: user.Username,
 		Email:    user.Email,
 		Password: hashedPassword,
-		IsAdmin:user.IsAdmin,
+		IsAdmin:  user.IsAdmin,
 	}
 	err = models.DB.Create(&u).Error
 	if err != nil {
