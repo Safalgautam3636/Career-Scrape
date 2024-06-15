@@ -65,25 +65,69 @@ func GetJobById(c *gin.Context) {
 	})
 }
 
-func DeleteJobs(c *gin.Context) {
+// func (j *models.Job) AfterDelete(tx *gorm.DB) (err error) {
+//   if j.Link=="http://linkedin.com/google-apply" {
+//     tx.Model(&models.Job{}).Where("id = ?", j.ID).Delete("invalid", false)
+//   }
+//   return
+// }
 
+func DeleteJobs(c *gin.Context) {
+	err := models.DB.Where("1 = 1").Delete(&models.Job{}).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "All jobs deleted",
 	})
+
 }
 
 func DeleteJobById(c *gin.Context) {
-	id := c.Param("id")
-	message := fmt.Sprintf("job with id %s deleted", id)
+	JobId := string(c.Param("id"))
+	_, err := uuid.Parse(JobId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Please provide a valid job id!",
+		})
+		return
+	}
+	var job models.Job
+	singleJob := models.DB.Where("id", JobId).Delete(&job)
+	if singleJob.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Job does not exists!",
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": message,
+		"message": "Job deleted",
+		"job":     job,
 	})
 }
 
 func UpdateJobById(c *gin.Context) {
 	id := c.Param("id")
-	message := fmt.Sprintf("Job with id %s is updated", id)
-	c.JSON(http.StatusOK, gin.H{
-		"message": message,
-	})
+	jobID, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid job ID"})
+		return
+	}
+
+	var job models.Job
+	if err := models.DB.First(&job, "id = ?", jobID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Job not found"})
+		return
+	}
+	var newJobNeedAnUpdate models.Job
+	if err := c.ShouldBindJSON(&newJobNeedAnUpdate); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request body"})
+		return
+	}
+	if err := models.DB.Model(&job).Updates(newJobNeedAnUpdate).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update job"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Job updated successfully", "job": job})
 }
