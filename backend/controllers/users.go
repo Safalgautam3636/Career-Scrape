@@ -2,14 +2,14 @@ package controllers
 
 import (
 	"backend/models"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var sampleSecretKey []byte
@@ -114,28 +114,90 @@ func Login(c *gin.Context) {
 }
 
 func GetAllUsers(c *gin.Context) {
-
+	var users []models.User
+	if err := models.DB.Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "this is your GetAllUsers",
+		"users": users,
 	})
 }
 func GetUserWithId(c *gin.Context) {
+	UserId := string(c.Param("id"))
+	_, err := uuid.Parse(UserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Please provide a valid user id!",
+		})
+		return
+	}
+	var user models.User
+	singleUser := models.DB.First(&user, "id = ?", UserId)
+	if singleUser.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "User does not exists!",
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "this is your GetUserWithId",
+		"message": "this is a user with the given id",
+		"user":    user,
 	})
 }
 func UpdateUserWithId(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "this is your UpdateUserWithId",
-	})
+	id := c.Param("id")
+	userId, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	var user models.User
+	if err := models.DB.First(&user, "id = ?", userId).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+	var newUserNeedAnUpdate models.User
+	if err := c.ShouldBindJSON(&newUserNeedAnUpdate); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request body"})
+		return
+	}
+	if err := models.DB.Model(&user).Updates(newUserNeedAnUpdate).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update an user", "error": err})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully", "user": user})
 }
 func DeleteAllUser(c *gin.Context) {
+	err := models.DB.Where("1 = 1").Delete(&models.User{}).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "this is your DeleteAllUser",
+		"message": "All users deleted",
 	})
 }
 func DeleteUserWithId(c *gin.Context) {
+	UserId := string(c.Param("id"))
+	_, err := uuid.Parse(UserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Please provide a valid user id!",
+		})
+		return
+	}
+	var user models.User
+	singleUser := models.DB.Where("id", UserId).Delete(&user)
+	if singleUser.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "User does not exists!",
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "this is your DeleteUserWithId",
+		"message": "User deleted",
+		"user":    user,
 	})
 }
