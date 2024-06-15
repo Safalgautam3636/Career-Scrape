@@ -2,8 +2,8 @@ package routes
 
 import (
 	"fmt"
-	"net/http"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func RegisterScrapingRoutes(route *gin.Engine) {

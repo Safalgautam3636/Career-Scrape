@@ -78,7 +78,43 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User created successfully", "token": token, "user": u})
 }
 
+func Login(c *gin.Context) {
+	var loginUser models.LoginUser
+	err := c.ShouldBindJSON(&loginUser)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	username := loginUser.Username
+	var user models.User
+	result := models.DB.Where("username = ?", username).First(&user)
+
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{"data": result.Logger, "message": "Not a valid username!"})
+		return
+	}
+
+	checkError := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginUser.Password))
+	if checkError != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "Enter Valid password!"})
+		return
+	}
+	token, err := GenerateToken(username)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"data": "No token hasnot been generated.."})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": "You logged in!", "token": token, "user": user})
+
+	//password:=user.Password
+	// models.DB.Model().Where("username=?",user.Username,)
+	// if user exist and if it does then check the password and if it does generate jwt token
+}
+
 func GetAllUsers(c *gin.Context) {
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "this is your GetAllUsers",
 	})
@@ -86,11 +122,6 @@ func GetAllUsers(c *gin.Context) {
 func GetUserWithId(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "this is your GetUserWithId",
-	})
-}
-func Login(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "this is your login route",
 	})
 }
 func UpdateUserWithId(c *gin.Context) {
