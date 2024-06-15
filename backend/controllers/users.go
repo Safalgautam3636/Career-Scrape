@@ -1,44 +1,13 @@
 package controllers
 
 import (
+	"backend/helpers"
 	"backend/models"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"os"
-	"time"
 )
-
-var sampleSecretKey []byte
-
-// HELPERS
-func HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedPassword), nil
-}
-
-func GenerateToken(username string) (string, error) {
-	godotenv.Load()
-	sampleSecretKey = []byte(os.Getenv("JWT_KEY"))
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(10 * time.Minute).Unix(),
-	})
-
-	// SECRET here
-	tokenString, err := token.SignedString(sampleSecretKey)
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
-
-}
 
 func Signup(c *gin.Context) {
 	var user models.User
@@ -49,7 +18,7 @@ func Signup(c *gin.Context) {
 		})
 		return
 	}
-	hashedPassword, err := HashPassword(user.Password)
+	hashedPassword, err := helpers.HashPassword(user.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Password cannot be hashed...",
@@ -69,7 +38,7 @@ func Signup(c *gin.Context) {
 			"message": err.Error(),
 		})
 	}
-	token, err := GenerateToken(user.Username)
+	token, err := helpers.GenerateToken(user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Token has not been generated...",
@@ -101,7 +70,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Enter Valid password!"})
 		return
 	}
-	token, err := GenerateToken(username)
+	token, err := helpers.GenerateToken(username)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"data": "No token hasnot been generated.."})
 		return

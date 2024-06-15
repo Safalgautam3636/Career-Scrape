@@ -2,11 +2,9 @@ package controllers
 
 import (
 	"backend/models"
-	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"net/http"
 )
 
 func CreateJob(c *gin.Context) {
@@ -43,7 +41,6 @@ func GetAllJobs(c *gin.Context) {
 
 func GetJobById(c *gin.Context) {
 	JobId := string(c.Param("id"))
-	fmt.Println(JobId)
 	_, err := uuid.Parse(JobId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

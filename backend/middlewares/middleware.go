@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"backend/auth"
+	"backend/helpers"
 	"backend/models"
 	"net/http"
 	"strings"
@@ -30,7 +30,7 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 	tokenString := authToken[1]
-	token, err := auth.VerifyToken(tokenString)
+	token, err := helpers.VerifyToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Provided token is invalid..",
@@ -44,10 +44,10 @@ func CheckAuth(c *gin.Context) {
 		return
 
 	}
-	username:= claims["username"]
+	username := claims["username"]
 	var user models.User
 	models.DB.Where("username= ?", username).First(&user)
-	if user.ID=="" {
+	if user.ID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user..."})
 		c.Abort()
 	}
@@ -61,5 +61,4 @@ func CheckAuth(c *gin.Context) {
 // 	currentUser,_:=c.Get("currentUser")
 // 	return currentUser.isAdmin
 
-	
 // }
