@@ -3,9 +3,9 @@ package controllers
 import (
 	"backend/helpers"
 	"backend/models"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -65,7 +65,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	checkError := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginUser.Password))
+	checkError := helpers.CompareHash(user.Password, loginUser.Password)
 	if checkError != nil {
 		c.JSON(http.StatusOK, gin.H{"message": "Enter Valid password!"})
 		return
@@ -75,6 +75,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"data": "No token hasnot been generated.."})
 		return
 	}
+	c.Set("currentUser", user)
 	c.JSON(http.StatusOK, gin.H{"data": "You logged in!", "token": token, "user": user})
 
 	//password:=user.Password
@@ -132,11 +133,22 @@ func UpdateUserWithId(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request body"})
 		return
 	}
+	checkError := helpers.CompareHash(user.Password, newUserNeedAnUpdate.Password)
+	fmt.Println(checkError)
+	hashedPassword := user.Password
+	if checkError != nil {
+		hashedPassword, _ = helpers.HashPassword(newUserNeedAnUpdate.Password)
+
+	}
+	newUserNeedAnUpdate.Password = hashedPassword
 	if err := models.DB.Model(&user).Updates(newUserNeedAnUpdate).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update an user", "error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update job"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Everything is going good!",
+		"newUser": newUserNeedAnUpdate,
+	})
 }
 func DeleteAllUser(c *gin.Context) {
 	err := models.DB.Where("1 = 1").Delete(&models.User{}).Error

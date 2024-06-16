@@ -3,11 +3,10 @@ package middlewares
 import (
 	"backend/helpers"
 	"backend/models"
-	"net/http"
-	"strings"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"strings"
 )
 
 // TODO: CHECK for token expiry
@@ -42,23 +41,25 @@ func CheckAuth(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		c.Abort()
 		return
-
 	}
 	username := claims["username"]
 	var user models.User
-	models.DB.Where("username= ?", username).First(&user)
-	if user.ID == "" {
+	err = models.DB.Where("username= ?", username).First(&user).Error
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user..."})
 		c.Abort()
 	}
 	c.Set("currentUser", user)
-
 	c.Next()
-
 }
 
-// func CheckAdmin(c *gin.Context){
-// 	currentUser,_:=c.Get("currentUser")
-// 	return currentUser.isAdmin
-
-// }
+func CheckAdmin(c *gin.Context) {
+	currentUser, _ := c.Get("currentUser")
+	if !currentUser.isAdmin {
+		c.JSON(http.StatusPermanentRedirect, gin.H{
+			"message": "Sorry you dont have enough permissions!",
+		})
+		return
+	}
+	c.Next()
+}

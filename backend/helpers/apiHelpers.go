@@ -47,3 +47,7 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 	}
 	return token, nil
 }
+
+func CompareHash(hashedPassword string,regularPassword string)(error){
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(regularPassword))
+}
