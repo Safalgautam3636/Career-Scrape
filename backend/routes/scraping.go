@@ -2,9 +2,6 @@ package routes
 
 import (
 	"backend/controllers"
-	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 

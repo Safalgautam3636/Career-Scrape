@@ -17,13 +17,11 @@ type Job struct {
 	Address         string    `json:"address"`
 	CompanyName     string    `json:"company_name"`
 	DatePosted      time.Time `json:"posted_date"`
-	AboutJob        string    `json:"about_job"`
-	Qualifications  string    `json:"qualifications"`
-	Responsibility  string    `json:"responsibility"`
-	Benefits        string    `json:"benefits"`
+	JobType         string    `json:"job_type"` //remote/onsite/hybrid
+	Description     string    `json:"description"`
 	Salary          string    `json:"salary"`
-	Yoe             int       `json:"yoe"` //years of experience
 	PulledTimeStamp time.Time `json:"pulled_date" gorm:"default:CURRENT_TIMESTAMP"`
+	ExperienceLevel string    `json:"experience_level"`
 	// CreatedAt       time.Time `json:"created_at,omitempty"`
 	// UpdatedAt       time.Time `json:"updated_at,omitempty"`
 	// DeletedAt       time.Time `json:"deleted_at,omitempty"`
