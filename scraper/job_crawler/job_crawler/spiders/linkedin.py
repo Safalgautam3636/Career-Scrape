@@ -112,15 +112,15 @@ class LinkedinJobScraper(scrapy.Spider):
                     break
                 try:
                     response = get_response_from_selenium(browser)
-                    if response.xpath('//button[contains(text(),"See more jobs")]'):
-                        WebDriverWait(browser, 5).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, '//button[contains(text(),"See more jobs")]')
-                            )
-                        )
-                    browser.find_element(
-                        By.XPATH, '//button[contains(text(),"See more jobs")]'
-                    ).click()
+                    # if response.xpath('//button[contains(text(),"See more jobs")]'):
+                    #     WebDriverWait(browser, 5).until(
+                    #         EC.element_to_be_clickable(
+                    #             (By.XPATH, '//button[contains(text(),"See more jobs")]')
+                    #         )
+                    #     )
+                    # browser.find_element(
+                    #     By.XPATH, '//button[contains(text(),"See more jobs")]'
+                    # ).click()
 
                     time.sleep(5)
                 except:
@@ -140,7 +140,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     count += 1
                 else:
                     count = 0
-            storage=[]
+            jobs=[]
             for item in response.css(".jobs-search__results-list li"):
                 link = item.css(".base-card__full-link::attr(href)").extract_first()
                 sub_item = item.css(".base-search-card__info")
@@ -158,7 +158,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     ".base-search-card__metadata .job-search-card__listdate--new::attr(datetime)"
                 ).extract_first()
 
-                jobs= {
+                job= {
                     "job_link": link.strip() if link else "",
                     "job_title": job_title.strip() if job_title else "",
                     "company_name": company_name.strip() if company_name else "",
@@ -166,8 +166,8 @@ class LinkedinJobScraper(scrapy.Spider):
                     "job_posted": date_posted.strip() if date_posted else "",
                     "exact_date": exact_date.strip() if exact_date else "",
                 }
-                storage.append(jobs)
-            for job in jobs[:3]:
+                jobs.append(job)
+            for job in jobs:
                 yield scrapy.Request(
                     url=job.get("job_link"),
                     callback=self.parse_body,
