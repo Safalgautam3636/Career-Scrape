@@ -1,0 +1,21 @@
+TODO: pull description as it is
+TODO: pull all the url and pull description later
+TODO: modify the structure of schema later
+TODO: focus on finishing scrapers atleast linkedin today
+TODO: add filters as an option
+
+
+Filters:
+    location
+    title(SDE/clerk)
+    posted_date
+    company_name
+    type(remote onsite)
+    salary
+    experience_level
+
+
+w/o:
+https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&f_TPR=&f_C=1035
+https://www.linkedin.com/jobs/search?keywords=&location=United%20States&geoId=103644278&f_TPR=&f_C=1035
+https://www.linkedin.com/jobs/search?keywords=&location=United%20States&geoId=103644278&f_TPR=&f_C=1035&position=1&pageNum=0
