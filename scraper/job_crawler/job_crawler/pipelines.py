@@ -10,7 +10,7 @@ from itemadapter import ItemAdapter
 
 
 class JobCrawlerPipeline:
-    
+
     def __init__(self) -> None:
         DB_HOST = "localhost"
         DB_USER = "safalgautam"
@@ -27,7 +27,6 @@ class JobCrawlerPipeline:
             port=DB_PORT,
         )
 
-        
         self.cur = self.connection.cursor()
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS {}(id serial PRIMARY KEY, 
@@ -36,7 +35,11 @@ class JobCrawlerPipeline:
                 job_location text,
                 job_posted text,
                 company_name text,
-                exact_date text)""".format(
+                exact_date text,
+                job_type text,
+                company_domain text,
+                job_level text,
+                company_link text)""".format(
                 TABLE_NAME
             )
         )
@@ -44,7 +47,7 @@ class JobCrawlerPipeline:
     def process_item(self, item, spider):
         try:
             self.cur.execute(
-                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date) values (%s,%s,%s,%s,%s,%s)""",
+                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date,job_type,company_domain,job_level,company_link) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (
                     item["job_title"],
                     item["job_link"],
@@ -52,15 +55,20 @@ class JobCrawlerPipeline:
                     item["job_posted"],
                     item["company_name"],
                     item["exact_date"],
+                    item["employment_type"] if item["employment_type"] else "",
+                    item["industries"],
+                    item["seniority_level"],
+                    item["company_link"]
                 ),
             )
 
             ## Execute insert of data into database
             self.connection.commit()
+
         except:
             self.cur.execute("rollback")
             self.cur.execute(
-                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date) values (%s,%s,%s,%s,%s,%s)""",
+                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date,job_type,company_domain,job_level,company_link) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (
                     item["job_title"],
                     item["job_link"],
@@ -68,6 +76,10 @@ class JobCrawlerPipeline:
                     item["job_posted"],
                     item["company_name"],
                     item["exact_date"],
+                    item["employment_type"] if item["employment_type"] else "",
+                    item["industries"],
+                    item["seniority_level"],
+                    item["company_link"],
                 ),
             )
         return item

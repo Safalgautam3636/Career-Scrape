@@ -8,26 +8,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# type Job struct {
-# 	gorm.Model
-# 	ID              uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
-# 	Role            string    `json:"role"`
-# 	Link            string    `json:"link"`
-# 	Address         string    `json:"address"`
-# 	CompanyName     string    `json:"company_name"`
-# 	DatePosted      time.Time `json:"posted_date"`
-# 	AboutJob        string    `json:"about_job"`
-# 	Qualifications  string    `json:"qualifications"`
-# 	Responsibility  string    `json:"responsibility"`
-# 	Benefits        string    `json:"benefits"`
-# 	Salary          string    `json:"salary"`
-# 	Yoe             int       `json:"yoe"` //years of experience
-# 	PulledTimeStamp time.Time `json:"pulled_date" gorm:"default:CURRENT_TIMESTAMP"`
-# 	// CreatedAt       time.Time `json:"created_at,omitempty"`
-# 	// UpdatedAt       time.Time `json:"updated_at,omitempty"`
-# 	// DeletedAt       time.Time `json:"deleted_at,omitempty"`
-# }
-
 
 def load_url(url):
     browser = webdriver.Chrome(
@@ -112,15 +92,15 @@ class LinkedinJobScraper(scrapy.Spider):
                     break
                 try:
                     response = get_response_from_selenium(browser)
-                    # if response.xpath('//button[contains(text(),"See more jobs")]'):
-                    #     WebDriverWait(browser, 5).until(
-                    #         EC.element_to_be_clickable(
-                    #             (By.XPATH, '//button[contains(text(),"See more jobs")]')
-                    #         )
-                    #     )
-                    # browser.find_element(
-                    #     By.XPATH, '//button[contains(text(),"See more jobs")]'
-                    # ).click()
+                    if response.xpath('//button[contains(text(),"See more jobs")]'):
+                        WebDriverWait(browser, 5).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, '//button[contains(text(),"See more jobs")]')
+                            )
+                        )
+                    browser.find_element(
+                        By.XPATH, '//button[contains(text(),"See more jobs")]'
+                    ).click()
 
                     time.sleep(5)
                 except:
@@ -166,20 +146,26 @@ class LinkedinJobScraper(scrapy.Spider):
                     "job_posted": date_posted.strip() if date_posted else "",
                     "exact_date": exact_date.strip() if exact_date else "",
                 }
-                jobs.append(job)
 
-            for job in jobs:
                 yield scrapy.Request(
                     url=job.get("job_link"),
                     callback=self.parse_body,
-                    meta={
-                        "job_title": job.get("job_title"),
-                        "company_name": job.get("company_name"),
-                        "job_location": job.get("job_location"),
-                        "job_posted": job.get("job_posted"),
-                        "exact_date": job.get("exact_date"),
-                    },
+                    meta=job,
                 )
+                # jobs.append(job)
+
+            # for job in jobs:
+            #     yield scrapy.Request(
+            #         url=job.get("job_link"),
+            #         callback=self.parse_body,
+            #         meta={
+            #             "job_title": job.get("job_title"),
+            #             "company_name": job.get("company_name"),
+            #             "job_location": job.get("job_location"),
+            #             "job_posted": job.get("job_posted"),
+            #             "exact_date": job.get("exact_date"),
+            #         },
+            #     )
 
     def get_info(self, response):
         info = {}
@@ -190,23 +176,29 @@ class LinkedinJobScraper(scrapy.Spider):
                 info[k.strip().lower()] = v.strip().lower()
         return info
 
-    def parse_body(self, response):
+    def parse_body(self, response): 
         info = self.get_info(response)
-        root_info = response.meta
+        new_info={}
+        for k, v in info.items():
+            if k and "description" not in k and " " in k:
+                k = k.replace(" ", "_")
+            new_info[k] = v
 
-        item = {"description": response.css(".show-more-less-html__markup").extract()}
-        item.update(
-            {
-                "company_link": response.css(
-                    ".job-details-jobs-unified-top-card__company-name a::attr(href)"
-                ).extract_first()
-            }
-        )
-        item.update(info)
-        item.update(root_info)
 
-        item.update({"job_link":response.url})
-        yield item
+        items = {
+            "job_link":response.meta.get("job_link"),
+            "job_title":response.meta.get("job_title"),
+            "company_name":response.meta.get("company_name"),
+            "job_location":response.meta.get("job_location"),
+            "job_posted":response.meta.get("job_posted"),
+            "exact_date":response.meta.get("exact_date"),
+            "description": response.css(".show-more-less-html__markup").extract(),
+            "company_link": response.css(".job-details-jobs-unified-top-card__company-name a::attr(href)").extract_first(),
+        }
+
+        items.update(new_info)
+   
+        yield info
 
     # TODO fiilter by past 24hrs jobs
     # browser.find_element(By.XPATH,"//ul[@class='filters__list']/li[1]").click()

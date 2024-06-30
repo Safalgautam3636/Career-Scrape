@@ -16,6 +16,6 @@ class JobCrawlerItem(scrapy.Item):
     company_name=scrapy.Field()
     job_title=scrapy.Field()
     company_link=scrapy.Field()
-    employment_type=scrapy.Field()
+    job_type=scrapy.Field()
     company_domain=scrapy.Field()
     job_level=scrapy.Field()
