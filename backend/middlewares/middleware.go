@@ -53,13 +53,13 @@ func CheckAuth(c *gin.Context) {
 	c.Next()
 }
 
-func CheckAdmin(c *gin.Context) {
-	currentUser, _ := c.Get("currentUser")
-	if !currentUser.isAdmin {
-		c.JSON(http.StatusPermanentRedirect, gin.H{
-			"message": "Sorry you dont have enough permissions!",
-		})
-		return
-	}
-	c.Next()
-}
+// func CheckAdmin(c *gin.Context) {
+// 	currentUser, _ := c.Get("currentUser")
+// 	if !currentUser.isAdmin {
+// 		c.JSON(http.StatusPermanentRedirect, gin.H{
+// 			"message": "Sorry you dont have enough permissions!",
+// 		})
+// 		return
+// 	}
+// 	c.Next()
+// }

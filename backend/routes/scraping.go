@@ -4,7 +4,7 @@ import (
 	"backend/controllers"
 	"github.com/gin-gonic/gin"
 )
-
+// TODO: FUTURE WORK
 func RegisterScrapingRoutes(route *gin.Engine) {
 	scrape := route.Group("/scrape")
 	//start all spiders
