@@ -167,6 +167,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     "exact_date": exact_date.strip() if exact_date else "",
                 }
                 jobs.append(job)
+
             for job in jobs:
                 yield scrapy.Request(
                     url=job.get("job_link"),
@@ -191,84 +192,21 @@ class LinkedinJobScraper(scrapy.Spider):
 
     def parse_body(self, response):
         info = self.get_info(response)
-        root_info = response.meta.get("job_des")
+        root_info = response.meta
 
         item = {"description": response.css(".show-more-less-html__markup").extract()}
+        item.update(
+            {
+                "company_link": response.css(
+                    ".job-details-jobs-unified-top-card__company-name a::attr(href)"
+                ).extract_first()
+            }
+        )
         item.update(info)
         item.update(root_info)
+
+        item.update({"job_link":response.url})
         yield item
-
-    # def parse(self, response):
-    #     page_id = int(response.meta.get("id"))
-    #     jobs = response.css("body li")
-    #     jobs_len = len(jobs)
-
-    #     job_dics = {}
-    #     for job in jobs:
-    #         job_link = (
-    #             job.css(".base-card__full-link::attr(href)").extract_first().strip()
-    #             if job.css(".base-card__full-link::attr(href)").extract_first()
-    #             else None
-    #         )
-    #         job_location = (
-    #             job.css(".job-search-card__location::text").extract_first().strip()
-    #             if job.css(".job-search-card__location::text").extract_first()
-    #             else None
-    #         )
-    #         job_posted = (
-    #             job.css("time::text").extract_first().strip()
-    #             if job.css("time::text").extract_first()
-    #             else None
-    #         )
-    #         company_name = (
-    #             job.css("h4.base-search-card__subtitle a::text").extract_first().strip()
-    #             if job.css("h4.base-search-card__subtitle a::text").extract_first()
-    #             else None
-    #         )
-    #         company_link = (
-    #             job.css("h4.base-search-card__subtitle a::attr(href)")
-    #             .extract_first()
-    #             .strip()
-    #             if job.css(
-    #                 "h4.base-search-card__subtitle a::attr(href)"
-    #             ).extract_first()
-    #             else None
-    #         )
-    #         job_title = (
-    #             job.css(".base-search-card__title::text").extract_first().strip()
-    #             if job.css(".base-search-card__title::text").extract_first()
-    #             else None
-    #         )
-
-    #         job_dic = {
-    #             job_link: {
-    #                 "job_link": job_link,
-    #                 "job_location": job_location,
-    #                 "job_posted": job_posted,
-    #                 "company_name": company_name,
-    #                 "job_title": job_title,
-    #                 "company_link": company_link,
-    #             }
-    #         }
-    #         job_dics.update(job_dic)
-    #         # yield job_dic
-    #     for link, job_des in job_dics.items():
-    #         yield scrapy.Request(
-    #             url=link, callback=self.parse_body, meta={"job_des": job_des}
-    #         )
-
-    #     if jobs_len > 0:
-    #         page_id += 25
-    #         job_url = self.job_url + str(page_id)
-    #         yield scrapy.Request(url=job_url, callback=self.parse, meta={"id": page_id})
-
-    # Specify the file path
-
-    # Write JSON data to a file
-
-    # with open(file_path, 'w') as json_file:
-    #     for item in storage:
-    #         json.dump(item, json_file, indent=4)  # indent=4 for pretty printing
 
     # TODO fiilter by past 24hrs jobs
     # browser.find_element(By.XPATH,"//ul[@class='filters__list']/li[1]").click()
