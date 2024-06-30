@@ -17,7 +17,18 @@ NEWSPIDER_MODULE = "job_crawler.spiders"
 #USER_AGENT = "job_crawler (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+# ROBOTSTXT_OBEY = False
+# SCRAPEOPS_API_KEY = '51496afe-4e71-489a-9cc6-2441a18f77e9'
+# SCRAPEOPS_PROXY_ENABLED = True
+
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapeops_scrapy_proxy_sdk.scrapeops_scrapy_proxy_sdk.ScrapeOpsScrapyProxySdk': 725,
+# }
+
+
+# ITEM_PIPELINES = {
+#    'postgres_demo.pipelines.PostgresDemoPipeline': 300,
+# }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -62,9 +73,10 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "job_crawler.pipelines.JobCrawlerPipeline": 300,
-#}
+ITEM_PIPELINES = {
+   "job_crawler.pipelines.JobCrawlerPipeline": 300,
+}
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
