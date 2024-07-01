@@ -28,13 +28,7 @@ class LinkedinJobScraper(scrapy.Spider):
     name = "linkedin_jobs"
     URL = "https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0&location=United%20States"
     def start_requests(self):
-        # urls = [
-        #     "https://quotes.toscrape.com/page/1/",
-        #     "https://quotes.toscrape.com/page/2/",
-        # ]
         yield scrapy.Request(url=self.URL, callback=self.parse_selenium)
-        # for url in urls:
-        #     yield scrapy.Request(url=url, callback=self.parse)
 
     def parse_selenium(self, response):
         # URL = "https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0&location=United%20States"
@@ -120,7 +114,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     count += 1
                 else:
                     count = 0
-            jobs=[]
+            
             for item in response.css(".jobs-search__results-list li"):
                 link = item.css(".base-card__full-link::attr(href)").extract_first()
                 sub_item = item.css(".base-search-card__info")
@@ -146,12 +140,12 @@ class LinkedinJobScraper(scrapy.Spider):
                     "job_posted": date_posted.strip() if date_posted else "",
                     "exact_date": exact_date.strip() if exact_date else "",
                 }
-
-                yield scrapy.Request(
-                    url=job.get("job_link"),
-                    callback=self.parse_body,
-                    meta=job,
-                )
+                if job.get("job_link"):
+                    yield scrapy.Request(
+                        url=job.get("job_link"),
+                        callback=self.parse_body,
+                        meta=job,
+                    )
                 # jobs.append(job)
 
             # for job in jobs:
@@ -183,22 +177,23 @@ class LinkedinJobScraper(scrapy.Spider):
             if k and "description" not in k and " " in k:
                 k = k.replace(" ", "_")
             new_info[k] = v
-
-
+   
         items = {
-            "job_link":response.meta.get("job_link"),
-            "job_title":response.meta.get("job_title"),
-            "company_name":response.meta.get("company_name"),
-            "job_location":response.meta.get("job_location"),
-            "job_posted":response.meta.get("job_posted"),
-            "exact_date":response.meta.get("exact_date"),
+            "job_link": response.meta.get("job_link"),
+            "job_title": response.meta.get("job_title"),
+            "company_name": response.meta.get("company_name"),
+            "job_location": response.meta.get("job_location"),
+            "job_posted": response.meta.get("job_posted"),
+            "exact_date": response.meta.get("exact_date"),
             "description": response.css(".show-more-less-html__markup").extract(),
-            "company_link": response.css(".job-details-jobs-unified-top-card__company-name a::attr(href)").extract_first(),
+            "company_link": response.css(
+                ".topcard__org-name-link::attr(href)"
+            ).extract_first(),
         }
 
         items.update(new_info)
-   
-        yield info
+        
+        yield items
 
     # TODO fiilter by past 24hrs jobs
     # browser.find_element(By.XPATH,"//ul[@class='filters__list']/li[1]").click()

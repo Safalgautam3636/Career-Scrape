@@ -46,6 +46,10 @@ class JobCrawlerPipeline:
 
     def process_item(self, item, spider):
         try:
+            employment_type = item.get("employment_type") or "$"
+            industries = item.get("industries") or "$"
+            seniority_level=item.get("seniority_level") or "$"
+            company_link=item.get("company_link") or "$"
             self.cur.execute(
                 """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date,job_type,company_domain,job_level,company_link) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (
@@ -55,10 +59,10 @@ class JobCrawlerPipeline:
                     item["job_posted"],
                     item["company_name"],
                     item["exact_date"],
-                    item["employment_type"] if item["employment_type"] else "",
-                    item["industries"],
-                    item["seniority_level"],
-                    item["company_link"]
+                    employment_type,
+                    industries,
+                    seniority_level,
+                    company_link
                 ),
             )
 
@@ -76,12 +80,13 @@ class JobCrawlerPipeline:
                     item["job_posted"],
                     item["company_name"],
                     item["exact_date"],
-                    item["employment_type"] if item["employment_type"] else "",
-                    item["industries"],
-                    item["seniority_level"],
-                    item["company_link"],
+                    employment_type,
+                    industries,
+                    seniority_level,
+                    company_link,
                 ),
             )
+            self.connection.commit()
         return item
 
     def close_spider(self, spider):
