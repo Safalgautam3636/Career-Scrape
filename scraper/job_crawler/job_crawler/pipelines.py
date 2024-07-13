@@ -5,6 +5,7 @@
 
 
 # useful for handling different item types with a single interface
+# type: ignore
 import psycopg2
 from itemadapter import ItemAdapter
 
@@ -29,61 +30,67 @@ class JobCrawlerPipeline:
 
         self.cur = self.connection.cursor()
         self.cur.execute(
-            """CREATE TABLE IF NOT EXISTS {}(id serial PRIMARY KEY, 
-                job_title text,
-                job_link text,
-                job_location text,
-                job_posted text,
-                company_name text,
-                exact_date text,
-                job_type text,
-                company_domain text,
-                job_level text,
-                company_link text)""".format(
+            """CREATE TABLE IF NOT EXISTS {} (
+           id serial PRIMARY KEY, 
+           job_title text,
+           job_link text,
+           job_location text,
+           job_posted text,
+           company_name text,
+           exact_date text,
+           job_type text DEFAULT NULL, 
+           company_domain text DEFAULT NULL,
+           job_level text DEFAULT NULL,
+           company_link text DEFAULT NULL,
+           job_description text,
+           
+           UNIQUE (job_title, company_name, job_level)
+           
+             )""".format(
                 TABLE_NAME
             )
         )
 
     def process_item(self, item, spider):
         try:
-            employment_type = item.get("employment_type") or "$"
-            industries = item.get("industries") or "$"
-            seniority_level=item.get("seniority_level") or "$"
-            company_link=item.get("company_link") or "$"
             self.cur.execute(
-                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date,job_type,company_domain,job_level,company_link) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date,job_type,company_domain,job_level,company_link,job_description) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (
-                    item["job_title"],
-                    item["job_link"],
-                    item["job_location"],
-                    item["job_posted"],
-                    item["company_name"],
-                    item["exact_date"],
-                    employment_type,
-                    industries,
-                    seniority_level,
-                    company_link
+                    item.get("job_title"),
+                    item.get("job_link"),
+                    item.get("job_location"),
+                    item.get("job_posted"),
+                    item.get("company_name"),
+                    item.get("exact_date"),
+                    item.get("employment_type"),
+                    item.get("industries"),
+                    item.get("seniority_level"),
+                    item.get("company_link"),
+                    item.get("description"),
                 ),
             )
 
             ## Execute insert of data into database
             self.connection.commit()
-
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+            print("Duplicate job found, not inserting into database.")
         except:
             self.cur.execute("rollback")
             self.cur.execute(
-                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date,job_type,company_domain,job_level,company_link) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                """insert into jobs_db (job_title,job_link,job_location,job_posted,company_name,exact_date,job_type,company_domain,job_level,company_link,job_description) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (
-                    item["job_title"],
-                    item["job_link"],
-                    item["job_location"],
-                    item["job_posted"],
-                    item["company_name"],
-                    item["exact_date"],
-                    employment_type,
-                    industries,
-                    seniority_level,
-                    company_link,
+                    item.get("job_title"),
+                    item.get("job_link"),
+                    item.get("job_location"),
+                    item.get("job_posted"),
+                    item.get("company_name"),
+                    item.get("exact_date"),
+                    item.get("employment_type"),
+                    item.get("industries"),
+                    item.get("seniority_level"),
+                    item.get("company_link"),
+                    item.get("description"),
                 ),
             )
             self.connection.commit()

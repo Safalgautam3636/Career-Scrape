@@ -7,8 +7,6 @@ import scrapy
 
 
 class JobCrawlerItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
     job_link=scrapy.Field()
     job_location=scrapy.Field()
     job_posted=scrapy.Field()
@@ -19,3 +17,4 @@ class JobCrawlerItem(scrapy.Item):
     employment_type=scrapy.Field()
     industries=scrapy.Field()
     seniority_level=scrapy.Field()
+    description=scrapy.Field()

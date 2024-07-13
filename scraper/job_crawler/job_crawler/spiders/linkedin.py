@@ -1,5 +1,4 @@
 import scrapy
-import json
 import time
 from selenium import webdriver
 from scrapy.http import HtmlResponse
@@ -7,7 +6,7 @@ from scrapy.utils.python import to_bytes
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from ..items import JobCrawlerItem
 
 def load_url(url):
     browser = webdriver.Chrome(
@@ -27,9 +26,17 @@ def get_response_from_selenium(browser):
 class LinkedinJobScraper(scrapy.Spider):
     name = "linkedin_jobs"
     URL = "https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0&location=United%20States"
+
     def start_requests(self):
         yield scrapy.Request(url=self.URL, callback=self.parse_selenium)
-
+    def get_info(self, response):
+        info = {}
+        for item in response.css(".description__job-criteria-list li"):
+            k = item.css("h3::text").extract_first()
+            v = item.css("span::text").extract_first()
+            if k and v:
+                info[k.strip().lower()] = v.strip().lower()
+        return info
     def parse_selenium(self, response):
         # URL = "https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0&location=United%20States"
         # dates=["Any time","Past week","Past 24 hours"]
@@ -86,6 +93,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     break
                 try:
                     response = get_response_from_selenium(browser)
+
                     if response.xpath('//button[contains(text(),"See more jobs")]'):
                         WebDriverWait(browser, 5).until(
                             EC.element_to_be_clickable(
@@ -114,7 +122,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     count += 1
                 else:
                     count = 0
-            
+
             for item in response.css(".jobs-search__results-list li"):
                 link = item.css(".base-card__full-link::attr(href)").extract_first()
                 sub_item = item.css(".base-search-card__info")
@@ -132,7 +140,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     ".base-search-card__metadata .job-search-card__listdate--new::attr(datetime)"
                 ).extract_first()
 
-                job= {
+                job = {
                     "job_link": link.strip() if link else "",
                     "job_title": job_title.strip() if job_title else "",
                     "company_name": company_name.strip() if company_name else "",
@@ -144,7 +152,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     yield scrapy.Request(
                         url=job.get("job_link"),
                         callback=self.parse_body,
-                        meta=job,
+                        meta={"job": job},
                     )
                 # jobs.append(job)
 
@@ -161,30 +169,23 @@ class LinkedinJobScraper(scrapy.Spider):
             #         },
             #     )
 
-    def get_info(self, response):
-        info = {}
-        for item in response.css(".description__job-criteria-list li"):
-            k = item.css("h3::text").extract_first()
-            v = item.css("span::text").extract_first()
-            if k and v:
-                info[k.strip().lower()] = v.strip().lower()
-        return info
-
-    def parse_body(self, response): 
+    def parse_body(self, response):
         info = self.get_info(response)
-        new_info={}
+        new_info = {}
         for k, v in info.items():
             if k and "description" not in k and " " in k:
                 k = k.replace(" ", "_")
             new_info[k] = v
-   
+
+        job = response.meta.get("job")
+
         items = {
-            "job_link": response.meta.get("job_link"),
-            "job_title": response.meta.get("job_title"),
-            "company_name": response.meta.get("company_name"),
-            "job_location": response.meta.get("job_location"),
-            "job_posted": response.meta.get("job_posted"),
-            "exact_date": response.meta.get("exact_date"),
+            "job_link": job.get("job_link"),
+            "job_title": job.get("job_title"),
+            "company_name": job.get("company_name"),
+            "job_location": job.get("job_location"),
+            "job_posted": job.get("job_posted"),
+            "exact_date": job.get("exact_date"),
             "description": response.css(".show-more-less-html__markup").extract(),
             "company_link": response.css(
                 ".topcard__org-name-link::attr(href)"
@@ -192,7 +193,9 @@ class LinkedinJobScraper(scrapy.Spider):
         }
 
         items.update(new_info)
-        
+        #TODO use items model
+        #items=JobCrawlerItem(items)
+
         yield items
 
     # TODO fiilter by past 24hrs jobs
