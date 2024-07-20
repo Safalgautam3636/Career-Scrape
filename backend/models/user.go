@@ -18,3 +18,9 @@ type LoginUser struct {
 	Username string `json:"username" gorm:"size:255;not null;unique"`
 	Password string `json:"password" gorm:"unique;not null"`
 }
+
+type ReturnUser struct{
+	Username string `json:"username" gorm:"size:255;not null;unique"`
+	Email    string `json:"email" gorm:"unique;not null"`
+	IsAdmin  bool 	`json:"isAdmin" gorm:"default:false"`
+}

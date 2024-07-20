@@ -9,7 +9,7 @@ import (
 
 // you gotta run this on your db first: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 // https://stackoverflow.com/questions/36486511/how-do-you-do-uuid-in-golangs-gorm
-type Job struct {
+type JobDB struct {
 	gorm.Model
 	ID              uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	JobTitle           string    `json:"job_title" gorm:"uniqueIndex:idx_title_company_location"`

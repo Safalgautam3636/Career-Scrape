@@ -1,5 +1,0 @@
-TODO:
-
-- ADD meaningful messages from the router
-- mention the http status with the corresponding code properly
-- automate formatting

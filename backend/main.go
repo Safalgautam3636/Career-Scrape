@@ -4,6 +4,7 @@ import (
 	//"backend/authjwt"
 	// "backend/auth"
 	// "backend/middlewares"
+	"backend/middlewares"
 	"backend/models"
 	"backend/routes"
 
@@ -34,6 +35,7 @@ func main() {
 	//config routes
 
 	router := gin.Default()
+	router.Use(middlewares.CORSMiddleware())
 
 	//api:=router.Group("/api")
 	// api.POST("/signup",auth.Signup)

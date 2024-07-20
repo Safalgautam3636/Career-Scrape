@@ -15,7 +15,7 @@ func ConnectDatabase(host string, username string, password string, name string,
 	if err != nil {
 		panic("Failed to connect to database!")
 	}
-	err = database.AutoMigrate(&User{}, &Job{})
+	err = database.AutoMigrate(&User{}, &Job{},&JobDB{})
 	if err != nil {
 		return
 	}

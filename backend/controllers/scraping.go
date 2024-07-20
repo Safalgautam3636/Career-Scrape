@@ -28,3 +28,6 @@ func StopSpiderWithId(c *gin.Context) {
 		"message": "Stopped spider:" + " " + spider,
 	})
 }
+func MigrateScrapedData(c *gin.Context){
+	
+}

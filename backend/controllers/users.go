@@ -24,6 +24,13 @@ func Signup(c *gin.Context) {
 			"error": "Password cannot be hashed...",
 		})
 	}
+	result := models.DB.Where("username = ? OR email= ?", user.Username,user.Username).First(&user)
+	if result.RowsAffected==1{
+		c.JSON(http.StatusOK,gin.H{
+			"message":"User or email already registered please login!",
+		})
+		return
+	}
 	u := models.User{
 		ID:       user.ID,
 		Username: user.Username,
@@ -31,6 +38,7 @@ func Signup(c *gin.Context) {
 		Password: hashedPassword,
 		IsAdmin:  user.IsAdmin,
 	}
+
 	err = models.DB.Create(&u).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -52,7 +60,7 @@ func Login(c *gin.Context) {
 	err := c.ShouldBindJSON(&loginUser)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"message":"Server Error!",
 		})
 		return
 	}
@@ -61,22 +69,26 @@ func Login(c *gin.Context) {
 	result := models.DB.Where("username = ?", username).First(&user)
 
 	if result.Error != nil {
-		c.JSON(http.StatusOK, gin.H{"data": result.Logger, "message": "Not a valid username!"})
+		c.JSON(http.StatusOK, gin.H{"message": "Not a valid username!"})
 		return
 	}
 
 	checkError := helpers.CompareHash(user.Password, loginUser.Password)
 	if checkError != nil {
-		c.JSON(http.StatusOK, gin.H{"message": "Enter Valid password!"})
+		c.JSON(http.StatusOK, gin.H{"message": "Not a valid password!"})
 		return
 	}
 	token, err := helpers.GenerateToken(username)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"data": "No token hasnot been generated.."})
+		c.JSON(http.StatusOK, gin.H{"message": "No token hasnot been generated.."})
 		return
 	}
+	var returnUser models.ReturnUser
+	returnUser.Email=user.Email
+	returnUser.Username=user.Username
+	returnUser.IsAdmin=user.IsAdmin
 	c.Set("currentUser", user)
-	c.JSON(http.StatusOK, gin.H{"data": "You logged in!", "token": token, "user": user})
+	c.JSON(http.StatusOK, gin.H{"message": "Sucessfully logged in!", "token": token, "user":returnUser})
 
 	//password:=user.Password
 	// models.DB.Model().Where("username=?",user.Username,)
