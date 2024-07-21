@@ -61,7 +61,7 @@ export function NavigationMenuDemo() {
             <NavigationMenuList className="mx-3">
                 <NavigationMenuItem>
                     <Link href="/" className="flex items-center" prefetch={false}>
-                        <MountainIcon />
+                        <MountainIcon href="/" />
                         <span className="sr-only">Acme Inc</span>
                     </Link>
                 </NavigationMenuItem>

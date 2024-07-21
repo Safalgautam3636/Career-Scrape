@@ -1,40 +1,29 @@
+import { Job } from "@/components/job";
+import { JobSchema } from "./types/JobSchema";
+import { getCookie } from "cookies-next";
+import { redirect } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
-import { ModeToggle } from "@/components/mode-toggle";
-import { NavigationMenuDemo } from "@/components/navigation-menu";
-import { SignupForm } from "@/components/signup";
-import { LoginForm } from "@/components/login";
-import { redirect } from "next/dist/server/api-utils";
+const fetchJobs = async () => {
+  const JOBS_URL = "http://localhost:8000/jobs/";
+  const response = await fetch(JOBS_URL);
+  const jobs = await response.json();
+  return jobs["jobs"];
+};
 
-import { Job } from "@/components/job"
-interface Job {
-  id: string,
-  role: string,
-  link: string,
-  location: string,
-  company: string,
-  dateposted: string,
-  datepulled: string,
-  experience: string,
-  skills: string[],
-  compensation: string,
-  jobtype: string
-}
-export default function Home() {
-  const jobs: Job[] = [{
-    id: "123",
-    role: "Software Engineer",
-    link: "http://safal.com/",
-    location: "New York, New York",
-    company: "Google",
-    dateposted: "2024-01-01",
-    datepulled: "2024-02-01",
-    experience: "2 yrs",
-    skills: ["Java", "C++", "Python", "React"],
-    compensation: "$121,000",
-    jobtype: "Fulltime"
-  },]
-  return <div className="grid grid-cols-4 p-5">{
-    jobs.map((job) => <Job key={job.id} {...job} />)
-  }
-  </div>
+export default async function Home() {
+  // const route = useRouter()
+  const jobs: JobSchema[] = await fetchJobs();
+  //console.log(jobs.map)
+  // return <div>Hi mf{ jobs[0].CreatedAt}</div>
+  const token = getCookie("jwt_token");
+  
+  return (
+      <div className="grid grid-cols-4 p-5">
+        {jobs && jobs.map((job) => (
+          <Job key={job.id} {...job} />
+        ))}
+      </div>)
+
+
 }

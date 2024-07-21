@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,7 +10,56 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useState } from "react"
+import { User } from "@/app/types/userSchema";
+import { useRouter } from "next/navigation";
+import { getCookie, setCookie } from "cookies-next";
+
 export function SignupForm() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("")
+  const [password, SetPassword] = useState("")
+  const router=useRouter()
+
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let user = await fetch("http://localhost:8000/users/signup", {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({
+          "username": username,
+          "email": email,
+          "password": password,
+        }),
+      });
+      if (!user.ok) {
+        throw Error("Signup Failed!")
+      }
+      const userInfo: User = await user.json();
+      if (!userInfo.token) {
+        throw Error(userInfo.message);
+      }
+      else {
+        //signup
+        const token = userInfo.token;
+        setCookie("jwt_token", token);
+        router.push("/")
+        console.log(userInfo);
+      }
+    }
+    catch (error: any) {
+      console.log(error)
+    }
+
+  }
+
+
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -19,29 +69,34 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="first-name">First name</Label>
-              <Input id="first-name" placeholder="Max" required />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="last-name">Last name</Label>
-              <Input id="last-name" placeholder="Robinson" required />
-            </div>
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              placeholder="johnm1"
+              required
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
-              placeholder="m@example.com"
+              placeholder="john.max@example.com"
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" />
+            <Input
+              id="password"
+              type="password"
+              onChange={(e) => SetPassword(e.target.value)}
+              required
+            />
           </div>
           <Button type="submit" className="w-full">
             Create an account
@@ -49,10 +104,10 @@ export function SignupForm() {
           <Button variant="outline" className="w-full">
             Sign up with GitHub
           </Button>
-        </div>
+        </form>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
-          <Link href="#" className="underline">
+          <Link href="/login" className="underline">
             Sign in
           </Link>
         </div>

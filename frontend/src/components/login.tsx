@@ -1,3 +1,5 @@
+"use client"; // This is a client component 👈🏽
+
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -10,24 +12,74 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useState } from "react"
+import { User } from "@/app/types/userSchema";
+import { useRouter } from "next/navigation";
+import { setCookie,getCookie } from "cookies-next";
+
+
 
 export function LoginForm() {
+  const router = useRouter();
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let user = await fetch("http://localhost:8000/users/login", {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({
+          "username": username,
+          "password": password,
+        }),
+      });
+      if (!user.ok) {
+        throw new Error("Login Failed");
+      }
+      const userInfo: User = await user.json()
+      if (!userInfo.token) {
+        throw new Error(userInfo.message);
+      }
+      else {
+        //login
+        const token = userInfo.token;
+
+        setCookie("jwt_token", token);
+        //console.log(getCookie("jwt_token"));
+        router.push("/");
+        //console.log(userInfo);
+      }
+    }
+    catch (error: any) {
+      console.log(error);
+    }
+
+  }
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>
-          Enter your email below to login to your account
+          Enter your username below to login to your account
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <form onSubmit={handleSubmit} className="grid gap-4" >
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
+              id="username"
+              type="string"
+              placeholder="johnmayer1"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -38,7 +90,7 @@ export function LoginForm() {
                 Forgot your password?
               </Link>
             </div>
-            <Input id="password" type="password" required />
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <Button type="submit" className="w-full">
             Login
@@ -46,10 +98,10 @@ export function LoginForm() {
           <Button variant="outline" className="w-full">
             Login with Google
           </Button>
-        </div>
+        </form>
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
-          <Link href="#" className="underline">
+          <Link href="/signup" className="underline">
             Sign up
           </Link>
         </div>
