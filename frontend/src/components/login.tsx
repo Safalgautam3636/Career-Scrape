@@ -13,16 +13,19 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { User } from "@/app/types/userSchema";
+import { SingleUser, User } from "@/app/types/userSchema";
 import { useRouter } from "next/navigation";
 import { setCookie,getCookie } from "cookies-next";
 
-
+import { NavigationMenuDemo } from "@/components/navigation-menu";
+import { userAtom } from "@/atom/userAtom";
+import { useAtom } from "jotai";
 
 export function LoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [_, setUser] = useAtom(userAtom);
 
 
   const handleSubmit = async (e: any) => {
@@ -51,9 +54,12 @@ export function LoginForm() {
         const token = userInfo.token;
 
         setCookie("jwt_token", token);
-        //console.log(getCookie("jwt_token"));
+        const user:SingleUser|null = userInfo.user;
+        if (user) {
+          setUser(user);
+        }
         router.push("/");
-        //console.log(userInfo);
+        
       }
     }
     catch (error: any) {
@@ -62,7 +68,7 @@ export function LoginForm() {
 
   }
 
-  return (
+  return (<>
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
@@ -107,5 +113,6 @@ export function LoginForm() {
         </div>
       </CardContent>
     </Card>
+    </>
   )
 }

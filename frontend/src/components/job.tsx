@@ -42,16 +42,16 @@ export function Job(prop: JobSchema) {
                 <CardTitle>
                     {prop.job_title}
                 </CardTitle>
-                <CardDescription className="flex justify-between items-center w-full">
+                {/* <CardDescription className="flex justify-between items-center w-full">
                     <Link href={`${prop.company_link}`} className="text-lg">{prop.company_name}</Link>
                     <div>{prop.job_location}</div>
                     
-                </CardDescription>
+                </CardDescription> */}
             </CardHeader>
 
             <CardContent className="grid gap-4">
-                 {/* TODO: hydration bug fix it! */}
-                <CardDescription className="flex justify-between items-center w-full">
+                 {/* TODO: hydration bug fix */}
+                {/* <CardDescription className="flex justify-between items-center w-full">
                     <div className="text-medium">{prop.job_level}</div>
                 </CardDescription>
                 <CardDescription className="flex justify-between items-center w-full">
@@ -62,7 +62,7 @@ export function Job(prop: JobSchema) {
                 <CardDescription className="flex justify-between items-center w-full">
                     <div className="text-xs">Posted:{prop.exact_date}</div>
                     <div className="text-xs">Pulled:{prop.pulled_date}</div>
-                </CardDescription>
+                </CardDescription> */}
             </CardContent>
 
             <CardFooter>

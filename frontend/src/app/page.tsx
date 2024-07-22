@@ -19,6 +19,7 @@ export default async function Home() {
   const token = getCookie("jwt_token");
   
   return (
+    
       <div className="grid grid-cols-4 p-5">
         {jobs && jobs.map((job) => (
           <Job key={job.id} {...job} />

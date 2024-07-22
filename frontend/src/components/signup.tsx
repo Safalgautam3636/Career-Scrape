@@ -11,14 +11,17 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { User } from "@/app/types/userSchema";
+import { SingleUser, User } from "@/app/types/userSchema";
 import { useRouter } from "next/navigation";
 import { getCookie, setCookie } from "cookies-next";
+import { userAtom } from "@/atom/userAtom";
+import { useAtom } from "jotai";
 
 export function SignupForm() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("")
   const [password, SetPassword] = useState("")
+  const [_, setUser] = useAtom(userAtom);
   const router=useRouter()
 
 
@@ -48,6 +51,10 @@ export function SignupForm() {
         //signup
         const token = userInfo.token;
         setCookie("jwt_token", token);
+        const user:SingleUser|null = userInfo.user;
+        if (user) {
+          setUser(user);
+        }
         router.push("/")
         console.log(userInfo);
       }

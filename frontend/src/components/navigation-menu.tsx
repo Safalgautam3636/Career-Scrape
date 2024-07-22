@@ -17,6 +17,10 @@ import {
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 
+import { userAtom } from "@/atom/userAtom"
+import { useAtom } from "jotai"
+import { Button } from "./ui/button"
+
 const components: { title: string; href: string; description: string }[] = [
     {
         title: "Alert Dialog",
@@ -56,6 +60,8 @@ const components: { title: string; href: string; description: string }[] = [
 ]
 
 export function NavigationMenuDemo() {
+    const [user] = useAtom(userAtom);
+
     return (
         <NavigationMenu className="p-6">
             <NavigationMenuList className="mx-3">
@@ -127,15 +133,16 @@ export function NavigationMenuDemo() {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                     <Link href="/signup" legacyBehavior passHref>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()} onClick={()=>{console.log("clicked")}}>
                             Signup
                         </NavigationMenuLink>
+                        {/* <Button>SignOut</Button> */}
                     </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
 
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        <UserNav email={"sxfdas@gmail.com"} name={"safal"} userImage={undefined} />
+                        {user && <UserNav email={user.email} name={user.username} userImage={undefined} />}
                     </NavigationMenuLink>
                 </NavigationMenuItem>
 

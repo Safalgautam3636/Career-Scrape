@@ -1,9 +1,10 @@
 export type User = {
     message: string;
     token: string;
-    user: {
-        username: string;
-        email: string;
-        isAdmin: boolean;
-    }
+    user: SingleUser;
+}
+export type SingleUser={
+    username: string;
+    email: string;
+    isAdmin: boolean;
 }
