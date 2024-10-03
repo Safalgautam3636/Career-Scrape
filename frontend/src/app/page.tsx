@@ -1,5 +1,5 @@
 import { Job } from "@/components/job";
-import { JobSchema } from "./types/JobSchema";
+import { JobSchema } from "../../types/JobSchema";
 import { getCookie } from "cookies-next";
 import { redirect } from "next/navigation";
 // import { useRouter } from "next/navigation";
@@ -14,8 +14,6 @@ const fetchJobs = async () => {
 export default async function Home() {
   // const route = useRouter()
   const jobs: JobSchema[] = await fetchJobs();
-  //console.log(jobs.map)
-  // return <div>Hi mf{ jobs[0].CreatedAt}</div>
   const token = getCookie("jwt_token");
   
   return (

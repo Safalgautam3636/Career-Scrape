@@ -9,13 +9,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+import { setCookie,getCookie,deleteCookie } from "cookies-next";
+import { useAtom } from "jotai";
+import { userWithAtomStorage } from "@/atom/userAtom";
+import { useRouter } from "next/navigation";
 
-interface iAppProps {
+export function UserNav({ email, name, userImage }: {
   email: string;
   name: string;
   userImage: string | undefined;
-}
-export function UserNav({ email, name, userImage }: iAppProps) {
+}) {
+  const [userInfo, setUserInfo] = useAtom(userWithAtomStorage);
+  const router = useRouter();
+  const logout = () => {
+    if (getCookie("jwt_token")) {
+      deleteCookie("jwt_token")
+    }
+    if (userInfo) {
+      setUserInfo(null)
+    }
+    router.push("/login")
+    router.refresh()
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -37,7 +53,8 @@ export function UserNav({ email, name, userImage }: iAppProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Signout</DropdownMenuItem>
+          <DropdownMenuItem>
+            <button onClick={logout}>Signout</button></DropdownMenuItem>
           <DropdownMenuItem>test</DropdownMenuItem>
           <DropdownMenuItem>test</DropdownMenuItem>
           <DropdownMenuItem>test</DropdownMenuItem>

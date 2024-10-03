@@ -17,7 +17,7 @@ import {
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 
-import { userAtom } from "@/atom/userAtom"
+import { userWithAtomStorage } from "@/atom/userAtom"
 import { useAtom } from "jotai"
 import { Button } from "./ui/button"
 
@@ -60,7 +60,8 @@ const components: { title: string; href: string; description: string }[] = [
 ]
 
 export function NavigationMenuDemo() {
-    const [user] = useAtom(userAtom);
+    const [user] = useAtom(userWithAtomStorage);
+    console.log(user)
 
     return (
         <NavigationMenu className="p-6">
@@ -142,7 +143,7 @@ export function NavigationMenuDemo() {
                 <NavigationMenuItem>
 
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        {user && <UserNav email={user.email} name={user.username} userImage={undefined} />}
+                        {user && <div>user</div> && <UserNav email={user.email} name={user.username} userImage={undefined} />}
                     </NavigationMenuLink>
                 </NavigationMenuItem>
 

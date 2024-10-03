@@ -11,17 +11,18 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { SingleUser, User } from "@/app/types/userSchema";
+import { SingleUser, User } from "../../types/userSchema";
 import { useRouter } from "next/navigation";
 import { getCookie, setCookie } from "cookies-next";
 import { userAtom } from "@/atom/userAtom";
 import { useAtom } from "jotai";
+import { userWithAtomStorage } from "@/atom/userAtom";
 
 export function SignupForm() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("")
   const [password, SetPassword] = useState("")
-  const [_, setUser] = useAtom(userAtom);
+  const [_, setUser] = useAtom(userWithAtomStorage);
   const router=useRouter()
 
 

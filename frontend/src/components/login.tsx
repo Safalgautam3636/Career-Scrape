@@ -13,19 +13,21 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { SingleUser, User } from "@/app/types/userSchema";
+import { SingleUser, User } from "../../types/userSchema";
 import { useRouter } from "next/navigation";
 import { setCookie,getCookie } from "cookies-next";
 
 import { NavigationMenuDemo } from "@/components/navigation-menu";
 import { userAtom } from "@/atom/userAtom";
 import { useAtom } from "jotai";
+import { atomWithStorage } from 'jotai/utils'
+import { userWithAtomStorage } from "@/atom/userAtom";
 
 export function LoginForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [_, setUser] = useAtom(userAtom);
+  const [_, setUser] = useAtom(userWithAtomStorage);
 
 
   const handleSubmit = async (e: any) => {
