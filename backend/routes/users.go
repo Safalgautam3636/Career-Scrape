@@ -14,4 +14,5 @@ func RegisterUserRoutes(route *gin.Engine) {
 	users.DELETE("/", controllers.DeleteAllUser)
 	users.DELETE("/:id", controllers.DeleteUserWithId)
 	users.PUT("/:id", controllers.UpdateUserWithId)
+	users.POST("/verify-token",controllers.VerifyTokens)
 }

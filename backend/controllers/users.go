@@ -24,10 +24,10 @@ func Signup(c *gin.Context) {
 			"error": "Password cannot be hashed...",
 		})
 	}
-	result := models.DB.Where("username = ? OR email= ?", user.Username,user.Username).First(&user)
-	if result.RowsAffected==1{
-		c.JSON(http.StatusOK,gin.H{
-			"message":"User or email already registered please login!",
+	result := models.DB.Where("username = ? OR email= ?", user.Username, user.Username).First(&user)
+	if result.RowsAffected == 1 {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "User or email already registered please login!",
 		})
 		return
 	}
@@ -52,7 +52,12 @@ func Signup(c *gin.Context) {
 			"message": "Token has not been generated...",
 		})
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User created successfully", "token": token, "user": u})
+	returnUser := models.ReturnUser{
+		Username: u.Username,
+		Email:    u.Email,
+		IsAdmin:  u.IsAdmin,
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User created successfully", "token": token, "user": returnUser})
 }
 
 func Login(c *gin.Context) {
@@ -83,12 +88,14 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "No token hasnot been generated.."})
 		return
 	}
-	var returnUser models.ReturnUser
-	returnUser.Email=user.Email
-	returnUser.Username=user.Username
-	returnUser.IsAdmin=user.IsAdmin
+	var returnUser = models.ReturnUser{
+		Email:    user.Email,
+		Username: user.Username,
+		IsAdmin:  user.IsAdmin,
+	}
+
 	c.Set("currentUser", user)
-	c.JSON(http.StatusOK, gin.H{"message": "Sucessfully logged in!", "token": token, "user":returnUser})
+	c.JSON(http.StatusOK, gin.H{"message": "Sucessfully logged in!", "token": token, "user": returnUser})
 
 	//password:=user.Password
 	// models.DB.Model().Where("username=?",user.Username,)
@@ -153,7 +160,7 @@ func UpdateUserWithId(c *gin.Context) {
 
 	}
 	newUserNeedAnUpdate.Password = hashedPassword
-	if err := models.DB.Model(&user).Updates(newUserNeedAnUpdate).Error; err != nil {
+	if err := models.DB.Model(&user).Select("is_admin", "password", "email", "username").Updates(newUserNeedAnUpdate).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update job"})
 		return
 	}
@@ -193,4 +200,24 @@ func DeleteUserWithId(c *gin.Context) {
 		"message": "User deleted",
 		"user":    user,
 	})
+}
+
+func VerifyTokens(c *gin.Context) {
+	var tokenSchema models.VerifyRequestBody
+	err := c.BindJSON(&tokenSchema)
+	fmt.Println(err)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid token!",
+		})
+		return
+	}
+	fmt.Println(tokenSchema)
+	_, err = helpers.VerifyToken(tokenSchema.Token)
+	fmt.Println(err)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{"valid": true})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"valid": false})
 }

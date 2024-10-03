@@ -24,3 +24,6 @@ type ReturnUser struct{
 	Email    string `json:"email" gorm:"unique;not null"`
 	IsAdmin  bool 	`json:"isAdmin" gorm:"default:false"`
 }
+type VerifyRequestBody struct {
+    Token string `json:"token"`
+}
