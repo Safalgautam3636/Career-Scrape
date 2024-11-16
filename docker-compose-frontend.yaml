@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: careerscrape-frontend
+    ports:
+      - "3000:3000"
+    # env_file:
+    #   - ./frontend/.env.local
+    volumes:
+      - ./frontend/src/:/careerscrape/frontend/src
+    depends_on:
+      - backend
+
+# docker-compose -f docker-compose-frontend.yml up -d

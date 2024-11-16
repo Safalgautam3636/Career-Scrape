@@ -11,10 +11,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { SingleUser, User } from "../../types/userSchema";
+import { SingleUser, User } from "../types/userSchema";
 import { useRouter } from "next/navigation";
 import { getCookie, setCookie } from "cookies-next";
-import { userAtom } from "@/atom/userAtom";
 import { useAtom } from "jotai";
 import { userWithAtomStorage } from "@/atom/userAtom";
 
@@ -32,7 +31,7 @@ export function SignupForm() {
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
 
-      let user = await fetch("http://localhost:8000/users/signup", {
+      let user = await fetch("http://0.0.0.0:8000/users/signup", {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify({
@@ -40,6 +39,7 @@ export function SignupForm() {
           "email": email,
           "password": password,
         }),
+        cache:"no-cache"
       });
       if (!user.ok) {
         throw Error("Signup Failed!")
@@ -57,7 +57,6 @@ export function SignupForm() {
           setUser(user);
         }
         router.push("/")
-        console.log(userInfo);
       }
     }
     catch (error: any) {

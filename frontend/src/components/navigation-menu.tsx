@@ -61,8 +61,6 @@ const components: { title: string; href: string; description: string }[] = [
 
 export function NavigationMenuDemo() {
     const [user] = useAtom(userWithAtomStorage);
-    console.log(user)
-
     return (
         <NavigationMenu className="p-6">
             <NavigationMenuList className="mx-3">

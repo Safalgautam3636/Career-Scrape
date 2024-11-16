@@ -1,0 +1,33 @@
+services:
+  cloudsql-proxy:
+    image: gcr.io/cloudsql-docker/gce-proxy:latest
+    command: "/cloud_sql_proxy -instances=plexiform-muse-438603-j7:us-central1:careerscrape=tcp:0.0.0.0:1234 -credential_file=/config/cloudsql-credentials.json"
+    container_name: cloud_sql_db
+    ports: 
+      - "1234:1234"
+    volumes:
+      - ./credentials/credentials.json:/config/cloudsql-credentials.json
+      - ./backend/:/careerscrape/backend
+    restart: always
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: careerscrape-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./credentials/credentials.json:/config/cloudsql-credentials.json
+      - ./backend/:/careerscrape/backend/
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /config/cloudsql-credentials.json
+      # DB_HOST: ${DB_HOST}
+      # DB_USER: ${DB_USER}
+      # DB_PASSWORD: ${DB_PASSWORD}
+      # DB_NAME: ${DB_NAME}
+      # DB_PORT: ${DB_PORT}
+    depends_on: 
+      - cloudsql-proxy
+
+# docker-compose -f docker-compose-backend.yml up -d

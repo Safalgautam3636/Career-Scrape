@@ -23,7 +23,7 @@ func GenerateToken(username string) (string, error) {
 	sampleSecretKey = []byte(os.Getenv("JWT_KEY"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"exp":      time.Now().Add(10 * time.Minute).Unix(),
+		"exp":      time.Now().Add(10000 * time.Minute).Unix(),
 	})
 
 	// SECRET here

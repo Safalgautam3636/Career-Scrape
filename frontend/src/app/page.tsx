@@ -1,15 +1,16 @@
 import { Job } from "@/components/job";
-import { JobSchema } from "../../types/JobSchema";
+import { JobSchema } from "../types/JobSchema";
 import { getCookie } from "cookies-next";
 import { redirect } from "next/navigation";
 // import { useRouter } from "next/navigation";
-
-const fetchJobs = async () => {
-  const JOBS_URL = "http://localhost:8000/jobs/";
-  const response = await fetch(JOBS_URL);
-  const jobs = await response.json();
-  return jobs["jobs"];
-};
+import {fetchJobs} from "@/lib/fetchJobs";
+// const fetchJobs = async () => {
+//   const JOBS_URL = "http://localhost:8000/jobs/";
+//   const response = await fetch(JOBS_URL);
+//   const jobs = await response.json();
+//   return jobs["jobs"];
+// };
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   // const route = useRouter()

@@ -1,3 +1,4 @@
+"use client"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
@@ -10,8 +11,10 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { BellIcon, CheckIcon } from "@radix-ui/react-icons"
-
+import { userWithAtomStorage } from "@/atom/userAtom"
+import { useAtom } from "jotai"
 import Link from "next/link"
+import { jobWithAtomStorage } from "@/atom/jobAtom"
 
 interface JobSchema {
     ID: number;
@@ -36,6 +39,11 @@ interface JobSchema {
 
 
 export function Job(prop: JobSchema) {
+    const [user] = useAtom(userWithAtomStorage);
+    const [_, setJob] = useAtom(jobWithAtomStorage)
+ 
+    
+    const isAdmin=user?.isAdmin
     return (
         <Card className="w-[350px] mb-2">
             <CardHeader>
@@ -67,7 +75,7 @@ export function Job(prop: JobSchema) {
 
             <CardFooter>
                 <Button className="w-full" asChild>
-                    <Link href={`${prop.job_link}`}><CheckIcon className="mr-2 h-4 w-4" />Apply</Link>
+                    <Link href={isAdmin?`/admin/jobs/${prop.id}/edit`:`${prop.job_link}`} onClick={(e)=>setJob(prop)}><CheckIcon className="mr-2 h-4 w-4" />{isAdmin?"Edit":"Apply"}</Link>
                 </Button>
             </CardFooter>
 

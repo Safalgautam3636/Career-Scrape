@@ -25,6 +25,7 @@ func CreateJob(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "New job created",
+		"job":     job,
 	})
 }
 
@@ -44,7 +45,7 @@ func GetJobById(c *gin.Context) {
 	_, err := uuid.Parse(JobId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Please provide a valid job id!",
+			"error": err.Error(),
 		})
 		return
 	}
@@ -52,7 +53,8 @@ func GetJobById(c *gin.Context) {
 	singleJob := models.DB.First(&job, "id = ?", JobId)
 	if singleJob.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "User does not exists!",
+			"message": "Job does not exists!",
+			"error":   singleJob.Error.Error(),
 		})
 		return
 	}
@@ -70,7 +72,7 @@ func GetJobById(c *gin.Context) {
 // }
 
 func DeleteJobs(c *gin.Context) {
-	err := models.DB.Where("1 = 1").Delete(&models.Job{}).Error
+	err := models.DB.Unscoped().Where("1 = 1").Delete(&models.Job{}).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -91,10 +93,11 @@ func DeleteJobById(c *gin.Context) {
 		return
 	}
 	var job models.Job
-	singleJob := models.DB.Where("id", JobId).Delete(&job)
-	if singleJob.Error != nil {
+	singleJob := models.DB.Unscoped().Where("id", JobId).Delete(&job).Error
+	if singleJob != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Job does not exists!",
+			"error":   singleJob.Error(),
 		})
 		return
 	}
@@ -114,16 +117,16 @@ func UpdateJobById(c *gin.Context) {
 
 	var job models.Job
 	if err := models.DB.First(&job, "id = ?", jobID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Job not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 	var newJobNeedAnUpdate models.Job
 	if err := c.ShouldBindJSON(&newJobNeedAnUpdate); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request body"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if err := models.DB.Model(&job).Updates(newJobNeedAnUpdate).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update job"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Job updated successfully", "job": job})

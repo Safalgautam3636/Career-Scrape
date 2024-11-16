@@ -16,11 +16,11 @@ import { Toggle } from "@/components/ui/toggle"
 import { Switch } from "./ui/switch";
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
-import { userAdminUpdateWithAtomStorage } from "@/atom/userAtom";
-import { SingleUserWithId } from "../../types/userSchema";
+import { userAdminUpdateWithAtomStorage,userWithAtomStorage } from "@/atom/userAtom";
+import { SingleUser, SingleUserWithId } from "../types/userSchema";
 
 export function UpdateUser() {
-
+    const [userInfo, setUserInfo] = useAtom(userWithAtomStorage);
     const [userToBeUpdated] = useAtom(userAdminUpdateWithAtomStorage)
 
     const [form_username, setUsername] = useState("")
@@ -31,6 +31,7 @@ export function UpdateUser() {
     useEffect(() => {
         if (userToBeUpdated) {
             const { username, email, isAdmin, id, password } = userToBeUpdated as SingleUserWithId
+            setUserInfo({username,email,isAdmin})
             setUsername(username);
             setEmail(email);
             setAdmin(isAdmin);
@@ -38,6 +39,7 @@ export function UpdateUser() {
             setPassword(password)
         }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userToBeUpdated])
 
     const handleSubmitForm = async (e: any) => {
@@ -46,7 +48,8 @@ export function UpdateUser() {
         myHeaders.append("Content-Type", "application/json");
         // TODO: FIX ID
         const id = form_userId
-        let user = await fetch(`http://localhost:8000/users/${id}`, {
+        const API_URL = process.env.BACKEND_API;
+        let response = await fetch(`${API_URL}/users/${id}`, {
             method: "PUT",
             headers: myHeaders,
             body: JSON.stringify({
@@ -57,8 +60,8 @@ export function UpdateUser() {
                 "id": id
             }),
         });
-        user = await user.json()
-        user = user.newUser
+        const userObj= await response.json()
+        const user = userObj.newUser as SingleUser
         const username = user.username;
         const email = user.email;
         const isAdmin = user.isAdmin;

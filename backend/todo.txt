@@ -1,0 +1,4 @@
+- Domain figure out for both frontend and the backend (api.careerscrape.com and careerscrape.com)
+- Protect the route for auth and make sure it works
+- Add rate limit to it
+- also integrate the ngnix

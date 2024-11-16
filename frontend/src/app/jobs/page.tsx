@@ -12,6 +12,9 @@ import { Job } from "@/components/job"
 //     compensation: string,
 //     jobtype: string
 // }
+export default function Jobs() {
+    <div className="jobs">Jobs</div>
+}
 // export default function Jobs() {
 //     const jobs: Job[] = [{
 //         id: "123",

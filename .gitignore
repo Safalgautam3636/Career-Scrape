@@ -1,3 +1,5 @@
 node_modules
 next
 scraping_env
+/credentials
+/backend/.env

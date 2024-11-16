@@ -13,14 +13,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { SingleUser, User } from "../../types/userSchema";
+import { SingleUser, User } from "../types/userSchema";
 import { useRouter } from "next/navigation";
 import { setCookie,getCookie } from "cookies-next";
-
-import { NavigationMenuDemo } from "@/components/navigation-menu";
-import { userAtom } from "@/atom/userAtom";
 import { useAtom } from "jotai";
-import { atomWithStorage } from 'jotai/utils'
 import { userWithAtomStorage } from "@/atom/userAtom";
 
 export function LoginForm() {
@@ -36,13 +32,14 @@ export function LoginForm() {
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
 
-      let user = await fetch("http://localhost:8000/users/login", {
+      let user = await fetch("http://0.0.0.0:8000/users/login", {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify({
           "username": username,
           "password": password,
         }),
+        cache:"no-cache"
       });
       if (!user.ok) {
         throw new Error("Login Failed");

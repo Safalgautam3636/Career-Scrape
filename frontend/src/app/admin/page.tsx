@@ -8,7 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { UserForAdmin } from "../../../types/userSchema"
+import { UserForAdmin } from "../../types/userSchema"
 import {AdminButton} from "@/components/admin-button"
 import { Done } from "@/components/ui/done";
 import { Incorrect } from "@/components/ui/incorrect";
@@ -16,8 +16,8 @@ import { userAdminUpdateWithAtomStorage } from "@/atom/userAtom";
 import { useAtom } from "jotai";
 
 export default async function Admin() {
-
-    let response: any = await fetch("http://localhost:8000/users", { cache: 'no-store' });
+    const API_URL = process.env.BACKEND_API;
+    let response: any = await fetch(`${API_URL}/users`, { cache: 'no-store' });
     response = await response.json();
     const users: UserForAdmin[] = response["users"];
     
