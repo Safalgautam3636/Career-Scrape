@@ -13,7 +13,8 @@ import (
 func RegisterJobRoutes(route *gin.Engine) {
 	jobs := route.Group("/jobs")
 	// normal user
-	jobs.GET("/", middlewares.CheckAuth, controllers.GetAllJobs)
+	// , middlewares.CheckAuth
+	jobs.GET("/", controllers.GetAllJobs)
 	// normal user
 	jobs.GET("/:id", middlewares.CheckAuth, controllers.GetJobById)
 	// super user/admin
