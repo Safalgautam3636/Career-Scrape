@@ -15,7 +15,7 @@ func RegisterUserRoutes(route *gin.Engine) {
 	//admin
 	users.GET("/", middlewares.CheckAuth, controllers.GetAllUsers)
 	users.GET("/:id", middlewares.CheckAuth, controllers.GetUserWithId)
-	users.GET("/:username", middlewares.CheckAuth, controllers.GetUserWithAnUsername)
+	users.GET("/username/:username", middlewares.CheckAuth, controllers.GetUserWithAnUsername)
 	// admin
 	users.DELETE("/", middlewares.CheckAuth, controllers.DeleteAllUser)
 	users.DELETE("/:id", middlewares.CheckAuth, controllers.DeleteUserWithId)
