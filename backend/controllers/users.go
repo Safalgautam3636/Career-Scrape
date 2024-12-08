@@ -129,6 +129,22 @@ func GetUserWithId(c *gin.Context) {
 	})
 }
 
+func GetUserWithAnUsername(c *gin.Context) {
+	username := string(c.Param("username"))
+
+	var user models.User
+	singleUser := models.DB.First(&user, "username = ?", username)
+	if singleUser.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": singleUser.Error.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"user": user,
+	})
+}
+
 func UpdateUserWithId(c *gin.Context) {
 	id := c.Param("id")
 	userId, err := uuid.Parse(id)
