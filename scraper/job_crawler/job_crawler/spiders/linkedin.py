@@ -16,10 +16,6 @@ import dotenv
 import os
 
 dotenv.load_dotenv()
-import pdb
-
-pdb.set_trace()
-
 
 def load_url(url):
     service = Service(
@@ -195,8 +191,11 @@ class LinkedinJobScraper(scrapy.Spider):
                 if job.get("job_link"):
                     yield scrapy.Request(
                         url=job.get("job_link"),
+                        headers={
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+                        },
                         callback=self.parse_body,
-                        meta={"job": job},
+                        meta={"job": job, "proxy": os.environ["PROXY"]},
                     )
 
     def parse_body(self, response):
@@ -217,6 +216,7 @@ class LinkedinJobScraper(scrapy.Spider):
             "job_posted": job.get("job_posted"),
             "exact_date": job.get("exact_date"),
             "description": response.css(".show-more-less-html__markup").extract(),
+            "applicants": job.get("applicant"),
             "company_link": response.css(
                 ".topcard__org-name-link::attr(href)"
             ).extract_first(),
