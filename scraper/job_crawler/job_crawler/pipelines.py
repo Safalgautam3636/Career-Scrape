@@ -8,11 +8,15 @@
 # type: ignore
 import psycopg2
 from itemadapter import ItemAdapter
+from datetime import datetime
+import os
+import json
 
 
 class JobCrawlerPipeline:
 
     def __init__(self) -> None:
+        self.items = []
         DB_HOST = "localhost"
         DB_USER = "safalgautam"
         DB_PASSWORD = "yournewpass"
@@ -43,11 +47,8 @@ class JobCrawlerPipeline:
            job_level text DEFAULT NULL,
            company_link text DEFAULT NULL,
            job_description text,
-           applicants text
-           
-           UNIQUE (job_title, company_name, job_level)
-           
-             )""".format(
+           applicants text,
+           UNIQUE (job_title, company_name, job_level))""".format(
                 TABLE_NAME
             )
         )
@@ -96,8 +97,29 @@ class JobCrawlerPipeline:
                 ),
             )
             self.connection.commit()
+        self.items.append(dict(item))
         return item
 
     def close_spider(self, spider):
+        date = datetime.now()
+        directory = "crawl-tracker"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        # Format the filename with date and time
+        file_path = os.path.join(
+            directory,
+            "linkedin-{}.json".format(
+                date.strftime(
+                    "%a-%d-%m-%Y-%I-%M%p"
+                ).lower()  # Ensure the time format is consistent (AM/PM in lowercase)
+            ),
+        )
+
+        # Open the file and save the items
+        with open(file_path, "w") as json_file:
+            json.dump(self.items, json_file, indent=4)
+
+        print(f"All items saved to {file_path}")
         self.cur.close()
         self.connection.close()
