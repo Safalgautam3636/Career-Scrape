@@ -43,6 +43,7 @@ class JobCrawlerPipeline:
            job_level text DEFAULT NULL,
            company_link text DEFAULT NULL,
            job_description text,
+           applicants text
            
            UNIQUE (job_title, company_name, job_level)
            
@@ -67,6 +68,7 @@ class JobCrawlerPipeline:
                     item.get("seniority_level"),
                     item.get("company_link"),
                     item.get("description"),
+                    item.get("applicants"),
                 ),
             )
 
