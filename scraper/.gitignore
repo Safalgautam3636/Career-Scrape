@@ -1,1 +1,9 @@
-**/** *//__pycache__/
+# **/** *//__pycache__/
+crawl-tracker
+linkedin.py
+../__pycache__/
+
+__pycache__
+__pycache__/
+/scraping_env
+.env
