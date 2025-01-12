@@ -3,15 +3,30 @@ import time
 from selenium import webdriver
 from scrapy.http import HtmlResponse
 from scrapy.utils.python import to_bytes
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 from ..items import JobCrawlerItem
+import dotenv
+import os
+
+dotenv.load_dotenv()
+import pdb
+
+pdb.set_trace()
+
 
 def load_url(url):
-    browser = webdriver.Chrome(
-        executable_path="/Users/safalgautam/Documents/chromedriver-mac-arm64/chromedriver"
+    service = Service(
+        "/Users/safalgautam/Documents/chromedriver-mac-arm64/chromedriver"
     )
+    options = webdriver.ChromeOptions()
+    browser = webdriver.Chrome(service=service, options=options)
     browser.delete_all_cookies()
     browser.get(url)
     return browser
@@ -28,7 +43,12 @@ class LinkedinJobScraper(scrapy.Spider):
     URL = "https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0&location=United%20States"
 
     def start_requests(self):
-        yield scrapy.Request(url=self.URL, callback=self.parse_selenium)
+        yield scrapy.Request(
+            url=self.URL,
+            callback=self.parse_selenium,
+            meta={"proxy": os.environ["PROXY"]},
+        )
+
     def get_info(self, response):
         info = {}
         for item in response.css(".description__job-criteria-list li"):
@@ -37,6 +57,7 @@ class LinkedinJobScraper(scrapy.Spider):
             if k and v:
                 info[k.strip().lower()] = v.strip().lower()
         return info
+
     def parse_selenium(self, response):
         # URL = "https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0&location=United%20States"
         # dates=["Any time","Past week","Past 24 hours"]
@@ -49,6 +70,22 @@ class LinkedinJobScraper(scrapy.Spider):
 
         response = get_response_from_selenium(browser)
         time.sleep(10)
+        if response.xpath(
+            "//icon[contains(@class,'contextual-sign-in-modal__modal-dismiss-icon')]"
+        ):
+            button = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.XPATH,
+                        "//icon[contains(@class,'contextual-sign-in-modal__modal-dismiss-icon')]",
+                    )
+                )
+            )
+            button.click()
+
+            # browser.find_element(By.XPATH,,).click()
+            response = get_response_from_selenium(browser)
+            time.sleep(10)
 
         job_search_field = browser.find_element(
             By.XPATH, "//input[contains(@aria-label,'Search job')]"
@@ -60,7 +97,6 @@ class LinkedinJobScraper(scrapy.Spider):
         for item in tech_job_titles:
             job_search_field.clear()
             job_search_field.send_keys(item)
-
             browser.find_element(
                 By.XPATH,
                 "//input[contains(@value,'public_jobs_jobs-search-bar_search-submit')]/following-sibling::button",
@@ -78,8 +114,12 @@ class LinkedinJobScraper(scrapy.Spider):
                         date
                     ),
                 ).click()
-                element = browser.find_element_by_class_name("filter__submit-button")
-                browser.execute_script("arguments[0].click();", element)
+                element = browser.find_element(
+                    By.CSS_SELECTOR, ".filter__submit-button"
+                )
+                element.click()
+                response = get_response_from_selenium(browser)
+                # browser.execute_script("arguments[0].click();", element)
 
             last_link = ""
             current_link = response.css(
@@ -139,6 +179,9 @@ class LinkedinJobScraper(scrapy.Spider):
                 exact_date = sub_item.css(
                     ".base-search-card__metadata .job-search-card__listdate--new::attr(datetime)"
                 ).extract_first()
+                applicants = sub_item.css(
+                    ".job-search-card__listdate--new::text"
+                ).extract_first()
 
                 job = {
                     "job_link": link.strip() if link else "",
@@ -147,6 +190,7 @@ class LinkedinJobScraper(scrapy.Spider):
                     "job_location": address.strip() if address else "",
                     "job_posted": date_posted.strip() if date_posted else "",
                     "exact_date": exact_date.strip() if exact_date else "",
+                    "applicant": applicants.strip() if applicants else "",
                 }
                 if job.get("job_link"):
                     yield scrapy.Request(
@@ -154,20 +198,6 @@ class LinkedinJobScraper(scrapy.Spider):
                         callback=self.parse_body,
                         meta={"job": job},
                     )
-                # jobs.append(job)
-
-            # for job in jobs:
-            #     yield scrapy.Request(
-            #         url=job.get("job_link"),
-            #         callback=self.parse_body,
-            #         meta={
-            #             "job_title": job.get("job_title"),
-            #             "company_name": job.get("company_name"),
-            #             "job_location": job.get("job_location"),
-            #             "job_posted": job.get("job_posted"),
-            #             "exact_date": job.get("exact_date"),
-            #         },
-            #     )
 
     def parse_body(self, response):
         info = self.get_info(response)
@@ -193,8 +223,8 @@ class LinkedinJobScraper(scrapy.Spider):
         }
 
         items.update(new_info)
-        #TODO use items model
-        #items=JobCrawlerItem(items)
+        # TODO use items model
+        # items=JobCrawlerItem(items)
 
         yield items
 
